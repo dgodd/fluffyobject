@@ -9,7 +9,8 @@
   "author": "Dave Goddard <dave@goddard.id.au>",
   "license": "MIT",
   "dependencies": {
-    "vue": "^2.5.17"
+    "vue": "^2.5.17",
+    "vue-drag-drop": "^1.1.4"
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^2.2.0",

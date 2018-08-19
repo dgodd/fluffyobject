@@ -3,23 +3,25 @@
     <h1>Users</h1>
     <ul>
       <li v-for="user in users">
-        {{user.Email}}
+        <drag :transfer-data="{ userID: user.ID }">
+          {{user.Email}}
+        </drag>
       </li>
     </ul>
 
     <h1>Objects</h1>
     <ul class="objects">
-      <li v-for="object in objects">
-        <div class="object" v-bind:style="{ backgroundImage: 'url('+object.Image+')' }"></div>
-        <b>{{object.Name}}</b>
-      </li>
+      <MyObject v-for="object in objects" :key="object.ID" :obj="object"></MyObject>
     </ul>
   </div>
 </template>
 
 <script>
+import { Drag } from 'vue-drag-drop';
+import MyObject from './MyObject.vue';
+
 export default {
-  name: 'app',
+  components: { Drag, MyObject },
   data () {
     return {
       users: [
@@ -30,7 +32,7 @@ export default {
         { ID: 1, Name: 'Bastille', Image: 'https://c1.staticflickr.com/5/4309/35795982981_7d32a407a5_k.jpg' },
       ],
     }
-  }
+  },
 }
 </script>
 
@@ -41,28 +43,5 @@ export default {
     font-family: 'Montserrat', sans-serif;
   }
   #app {
-  }
-  ul.objects li {
-    display: block;
-    width: 200px; height: 200px;
-    position: relative;
-  }
-  ul.objects li div.object {
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    border-radius: 100%;
-    box-shadow: rgba(0,0,0,0.8) 0 0 20px;
-    border-collapse: collapse;
-  }
-  ul.objects li b {
-    display: block;
-    text-align: center;
-    line-height: 200px;
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    color: red;
-    font-size: 200%;
   }
 </style>

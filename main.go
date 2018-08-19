@@ -4,11 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/lib/pq"
 	"github.com/r3labs/sse"
@@ -41,25 +38,10 @@ func main() {
 	mux.HandleFunc("/api/senddata", func(w http.ResponseWriter, r *http.Request) {
 		db.QueryRow("NOTIFY data_changed")
 	})
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fh, _ := os.Open("index.html")
-		io.Copy(w, fh)
-	})
+	mux.Handle("/", http.FileServer(http.Dir("frontend/dist")))
 
 	go func() {
-		for {
-			time.Sleep(1 * time.Second)
-			server.Publish("messages", &sse.Event{
-				Data:  []byte("hi mom"),
-				Event: []byte("something"),
-			})
-		}
-	}()
-
-	go func() {
-		fmt.Println("Hello")
 		notificationChan := make(chan *pq.Notification)
-		os.Setenv("PGSSLMODE", "disable")
 		l, err := pq.NewListenerConn(connStr, notificationChan)
 		if err != nil {
 			panic(err)
@@ -86,6 +68,7 @@ func main() {
 				if err := Publish(server, "objects", objects); err != nil {
 					panic(err)
 				}
+				fmt.Printf("Users: %#v\nObjects: %#v\n", users, objects)
 			}
 		}
 	}()
