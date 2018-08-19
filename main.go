@@ -43,7 +43,7 @@ func main() {
 		var data ObjectUser
 		json.NewDecoder(r.Body).Decode(&data)
 		fmt.Printf("ObjectUsers: %d => %d\n", data.ObjectID, data.UserID)
-		if _, err := db.Exec("INSERT INTO object_users(object_id, user_ID) VALUES($1, $2)", data.ObjectID, data.UserID); err != nil {
+		if _, err := db.Exec("INSERT INTO object_users(object_id,user_id) VALUES($1,$2) ON CONFLICT(object_id,user_id) DO UPDATE SET updated_at=now();", data.ObjectID, data.UserID); err != nil {
 			panic(err)
 		}
 	})
