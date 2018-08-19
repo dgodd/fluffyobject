@@ -1,0 +1,8 @@
+github.com/lib/pq v0.0.0-20180523175426-90697d60dd84 h1:it29sI2IM490luSc3RAhp5WuCYnc6RtbfLVAB7nmC5M=
+github.com/lib/pq v0.0.0-20180523175426-90697d60dd84/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
+github.com/r3labs/sse v0.0.0-20180801131930-777243f12673 h1:J2C4vEmOTzmJoll2/OjdoN42qPHpz8Vh2nUvLYcfGe8=
+github.com/r3labs/sse v0.0.0-20180801131930-777243f12673/go.mod h1:GFTLGeO4uhsAhDsI1GgKFTegVYuNZ6g5qJ15Mheq7cI=
+golang.org/x/net v0.0.0-20180816102801-aaf60122140d h1:211XH5RPVP5tOBkz6xm3/b7KxtjqVf6PYG+evqJpE08=
+golang.org/x/net v0.0.0-20180816102801-aaf60122140d/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+gopkg.in/cenkalti/backoff.v1 v1.1.0 h1:Arh75ttbsvlpVA7WtVpH4u9h6Zl46xuptxqLxPiSo4Y=
+gopkg.in/cenkalti/backoff.v1 v1.1.0/go.mod h1:J6Vskwqd+OMVJl8C33mmtxTBs2gyzfv7UDAkHu8BrjI=

@@ -1,0 +1,68 @@
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<style>
+ul.objects {
+}
+ul.objects li {
+	display: block;
+	width: 200px; height: 200px;
+	background-size: cover;
+  background-position: center;
+
+	border-radius: 100%;
+	box-shadow: rgba(0,0,0,0.8) 0 0 20px;
+	border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<div id="vue-instance">
+<h1>Loading</h1>
+</div>
+<script>
+
+// our VueJs instance bound to the div with an id of vue-instance
+var MyObject = Vue.component('my-object', {
+	functional: true,
+	props: ['name', 'image'],
+	render (h, ctx) {
+    return h('div', {}, [
+			h('d', { 'style': `background-image: url(${ctx.props.image})` }, ctx.props.name),
+		])
+  }
+});
+var vm = new Vue({
+	el: '#vue-instance',
+	data() {
+		return { "users": [], "objects": [], "message": "loading" };
+	},
+	render (h) {
+    return h('div', {}, [
+			h('div', 'Users'),
+			h('ul', this.users.map(u => h('li', u.Email))),
+			h('div', 'Objects'),
+			h('ul', { 'class': 'objects' }, this.objects.map(o => h('my-object', { name: o.Name, image: o.Image }))),
+			h('div', 'Message'),
+			h('div', this.message),
+		])
+  },
+	mounted() {
+		const es = new EventSource("/api/events?stream=messages");
+		es.addEventListener("message", x => this.message = x.data);
+		es.addEventListener("users", x => this.users = JSON.parse(x.data));
+		es.addEventListener("objects", x => { var o = JSON.parse(x.data); console.log(o); this.objects = o });
+		es.addEventListener("open", function() {
+			httpRequest = new XMLHttpRequest();
+			if (!httpRequest) {
+				alert('Giving up :( Cannot create an XMLHTTP instance');
+			}
+			// httpRequest.onreadystatechange = x => console.log('senddata', x);
+			httpRequest.open('GET', '/api/senddata');
+			httpRequest.send();
+		})
+	},
+});
+</script>
+</body>
+</html>
