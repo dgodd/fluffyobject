@@ -24,14 +24,26 @@ export default {
   components: { Drag, MyObject },
   data () {
     return {
-      users: [
-        { ID: 1, Email: 'dave@goddard.id.au' },
-        { ID: 2, Email: 'ecasey@pivotal.io' },
-      ],
-      objects: [
-        { ID: 1, Name: 'Bastille', Image: 'https://c1.staticflickr.com/5/4309/35795982981_7d32a407a5_k.jpg' },
-      ],
+      objects: {},
+      users: {},
+      object_users: {},
     }
+  },
+  mounted() {
+    const es = new EventSource("/api/events?stream=messages");
+    es.addEventListener("users", x => this.users = JSON.parse(x.data));
+    es.addEventListener("objects", x => this.objects = JSON.parse(x.data));
+    // es.addEventListener("open", function() {
+    //   console.log("ES OPEN 2");
+    //   var httpRequest = new XMLHttpRequest();
+    //   // if (!httpRequest) { alert('Giving up :( Cannot create an XMLHTTP instance'); }
+    //   httpRequest.open('POST', '/api/senddata');
+    //   httpRequest.send();
+    // })
+
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.open('POST', '/api/senddata');
+    httpRequest.send();
   },
 }
 </script>

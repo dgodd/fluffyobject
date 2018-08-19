@@ -38,6 +38,15 @@ func main() {
 	mux.HandleFunc("/api/senddata", func(w http.ResponseWriter, r *http.Request) {
 		db.QueryRow("NOTIFY data_changed")
 	})
+	mux.HandleFunc("/api/object_users", func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		var data ObjectUser
+		json.NewDecoder(r.Body).Decode(&data)
+		fmt.Printf("ObjectUsers: %d => %d\n", data.ObjectID, data.UserID)
+		if _, err := db.Exec("INSERT INTO object_users(object_id, user_ID) VALUES($1, $2)", data.ObjectID, data.UserID); err != nil {
+			panic(err)
+		}
+	})
 	mux.Handle("/", http.FileServer(http.Dir("frontend/dist")))
 
 	go func() {
@@ -73,7 +82,21 @@ func main() {
 		}
 	}()
 
-	http.ListenAndServe(":8080", mux)
+	fmt.Println("Run server on port 8080")
+	http.ListenAndServe(":8080", logHandler(mux))
+}
+
+func logHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Before: %s", r.URL)
+		h.ServeHTTP(w, r) // call original
+		log.Printf("After: %s", r.URL)
+	})
+}
+
+type ObjectUser struct {
+	ObjectID int `json:"object_id"`
+	UserID   int `json:"user_id"`
 }
 
 func Publish(server *sse.Server, event string, data interface{}) error {
@@ -89,23 +112,23 @@ func Publish(server *sse.Server, event string, data interface{}) error {
 }
 
 type User struct {
-	ID    string
+	ID    int
 	Email string
 }
 
-func AllUsers() ([]User, error) {
+func AllUsers() (map[int]User, error) {
 	rows, err := db.Query("select id, email from users")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var users []User
+	users := make(map[int]User)
 	for rows.Next() {
 		user := User{}
 		if err := rows.Scan(&user.ID, &user.Email); err != nil {
 			log.Fatal(err)
 		}
-		users = append(users, user)
+		users[user.ID] = user
 	}
 	if err = rows.Err(); err != nil {
 		log.Fatal(err)
@@ -114,24 +137,24 @@ func AllUsers() ([]User, error) {
 }
 
 type Object struct {
-	ID    string
+	ID    int
 	Name  string
 	Image string
 }
 
-func AllObjects() ([]Object, error) {
+func AllObjects() (map[int]Object, error) {
 	rows, err := db.Query("select id, name, image from objects")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var objects []Object
+	objects := make(map[int]Object)
 	for rows.Next() {
 		object := Object{}
 		if err := rows.Scan(&object.ID, &object.Name, &object.Image); err != nil {
 			log.Fatal(err)
 		}
-		objects = append(objects, object)
+		objects[object.ID] = object
 	}
 	if err = rows.Err(); err != nil {
 		log.Fatal(err)
