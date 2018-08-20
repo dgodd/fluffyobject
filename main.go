@@ -4,20 +4,23 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/lib/pq"
 	"github.com/r3labs/sse"
 )
 
-const connStr = "postgres://localhost/fluffyobject?sslmode=disable"
-
 var db *sql.DB
 
 func init() {
 	var err error
-	db, err = sql.Open("postgres", connStr)
+	if os.Getenv("DATABASE_URL") == "" {
+		panic("DATABASE_URL is required")
+	}
+	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
@@ -47,11 +50,16 @@ func main() {
 			panic(err)
 		}
 	})
-	mux.Handle("/", http.FileServer(http.Dir("frontend/dist")))
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	if os.Getenv("DEVMODE") != "" {
+		mux.HandleFunc("/", ProxyHandler)
+	} else {
+		mux.Handle("/", http.FileServer(http.Dir("frontend/dist")))
+	}
 
 	go func() {
 		notificationChan := make(chan *pq.Notification)
-		l, err := pq.NewListenerConn(connStr, notificationChan)
+		l, err := pq.NewListenerConn(os.Getenv("DATABASE_URL"), notificationChan)
 		if err != nil {
 			panic(err)
 		}
@@ -160,4 +168,32 @@ func AllObjects() (map[int]Object, error) {
 		log.Fatal(err)
 	}
 	return objects, err
+}
+
+func ProxyHandler(wr http.ResponseWriter, r *http.Request) {
+	var resp *http.Response
+	var err error
+	var req *http.Request
+	client := &http.Client{}
+
+	//log.Printf("%v %v", r.Method, r.RequestURI)
+	req, err = http.NewRequest(r.Method, "http://localhost:1234"+r.RequestURI, r.Body)
+	for name, value := range r.Header {
+		req.Header.Set(name, value[0])
+	}
+	resp, err = client.Do(req)
+	r.Body.Close()
+
+	// combined for GET/POST
+	if err != nil {
+		http.Error(wr, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for k, v := range resp.Header {
+		wr.Header().Set(k, v[0])
+	}
+	wr.WriteHeader(resp.StatusCode)
+	io.Copy(wr, resp.Body)
+	resp.Body.Close()
 }

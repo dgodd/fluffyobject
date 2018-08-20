@@ -15,18 +15,10 @@ export default {
   props: { obj: { type: Object, required: true } },
   methods: {
     handleDrop (data) {
-			var httpRequest = new XMLHttpRequest();
-			console.log(httpRequest, { object_id: this.obj.ID, user_id: data.userID });
-			httpRequest.open('POST', '/api/object_users');
-			httpRequest.send(JSON.stringify({ object_id: this.obj.ID, user_id: data.userID }));
-
-      // fetch('http://example.com/movies.json')
-      //   .then(function(response) {
-      //     return response.json();
-      //   })
-      //   .then(function(myJson) {
-      //     console.log(myJson);
-      //   });
+      var httpRequest = new XMLHttpRequest();
+      console.log(httpRequest, { object_id: this.obj.ID, user_id: data.userID });
+      httpRequest.open('POST', '/api/object_users');
+      httpRequest.send(JSON.stringify({ object_id: this.obj.ID, user_id: data.userID }));
     },
   },
 }

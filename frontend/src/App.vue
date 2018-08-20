@@ -33,13 +33,6 @@ export default {
     const es = new EventSource("/api/events?stream=messages");
     es.addEventListener("users", x => this.users = JSON.parse(x.data));
     es.addEventListener("objects", x => this.objects = JSON.parse(x.data));
-    // es.addEventListener("open", function() {
-    //   console.log("ES OPEN 2");
-    //   var httpRequest = new XMLHttpRequest();
-    //   // if (!httpRequest) { alert('Giving up :( Cannot create an XMLHTTP instance'); }
-    //   httpRequest.open('POST', '/api/senddata');
-    //   httpRequest.send();
-    // })
 
     var httpRequest = new XMLHttpRequest();
     httpRequest.open('POST', '/api/senddata');
